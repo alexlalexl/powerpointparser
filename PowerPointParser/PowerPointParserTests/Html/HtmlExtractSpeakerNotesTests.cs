@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.IO;
+using System.Text.Json;
 using Aaks.PowerPointParser;
 using Aaks.PowerPointParser.Html;
 using FluentAssertions;
@@ -16,15 +17,11 @@ public class HtmlExtractSpeakerNotesTests
 
     [TestMethod]
     [DeploymentItem("TestData")]
-    [DataRow("TestDeckParagraph.pptx")]
-    [DataRow("TestThree.pptx")]
-    public void Test_ExtractSpeakerNotesTest(string fileName)
+    [DataRow("TestDeckParagraph.pptx", ExpectedTestDeckParagraph)]
+    [DataRow("TestThree.pptx", ExpectedTestThree)]
+    public void Test_ExtractSpeakerNotesTest(string fileName, string expected)
     {
-        var expected = new Dictionary<string, string>
-        {
-            { "TestDeckParagraph.pptx", ExpectedTestDeckParagraph },
-            { "TestThree.pptx", ExpectedTestThree },
-        };
+       
         var filePath = Path.Combine(_directory, fileName);
         File.Exists(filePath).Should().Be(true);
 
@@ -42,6 +39,35 @@ public class HtmlExtractSpeakerNotesTests
         
 
         htmlStringActual.Should().NotBeEmpty();
-        htmlStringActual.Should().Be(expected[fileName]);
+        htmlStringActual.Should().Be(expected);
+    }
+
+    [TestMethod]
+    [DeploymentItem("TestData")]
+    [DataRow("TestDeckOne.pptx", "TestDeckOne.json")]
+    [DataRow("TestDeckParagraph.pptx", "TestDeckParagraph.json")]
+    [DataRow("TestThree.pptx", "TestThree.json")]
+    public void Test_ExtractSpeakerNotesTest2(string fileNameTest, string fileNameExpected)
+    {
+        // Arrange
+        var filePath = Path.Combine(_directory, fileNameTest);
+        File.Exists(filePath).Should().Be(true);
+        var filePathExpected = Path.Combine(_directory, fileNameExpected);
+        var jsonExpected = File.ReadAllText(filePathExpected);
+        var htmlPayloadExpected = JsonSerializer.Deserialize<Dictionary<int, string>>(jsonExpected);
+        htmlPayloadExpected.Should().NotBeEmpty();
+
+        var parser = new Parser();
+
+        // Act
+        var items = parser.ParseSpeakerNotes(filePath);
+        var innerBuilder = new InnerHtmlBuilder();
+        var htmlBuilder = new HtmlBuilder(new HtmlListBuilder(innerBuilder), innerBuilder);
+        var htmlPayloadActual = htmlBuilder.ConvertOpenXmlParagraphWrapperToHtml(items);
+
+        // Assert
+        
+        htmlPayloadActual.Should().NotBeEmpty();
+        htmlPayloadActual.Should().BeEquivalentTo(htmlPayloadExpected);
     }
 }

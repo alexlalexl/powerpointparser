@@ -17,10 +17,22 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Remove="TestData\TestDeckOne.json" />
+    <None Remove="TestData\TestDeckParagraph.json" />
+    <None Remove="TestData\TestThree.json" />
     <None Remove="TestData\TestThree.pptx" />
   </ItemGroup>
 
   <ItemGroup>
+    <Content Include="TestData\TestDeckOne.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="TestData\TestDeckParagraph.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="TestData\TestThree.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="TestData\TestThree.pptx">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
